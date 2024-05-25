@@ -5,6 +5,7 @@ var cors = require('cors')
 
 const apiRouter = require("./routers/apis")
 const scheduleRouter = require("./routers/schedules")
+const healthCheckRouter = require("./routers/healthcheck")
 const authVerify = require("./middleware/authVerify")
 
 require("./db")
@@ -12,6 +13,7 @@ require("./agenda")
 
 server.use(cors())
 server.use(express.json())
+server.use(healthCheckRouter)
 server.use(authVerify)
 server.use(apiRouter)
 server.use(scheduleRouter)
