@@ -3,6 +3,7 @@ const axios = require("axios")
 const Schedule = require("../models/schedules")
 const authVerify = require("../middleware/authVerify")
 const agenda = require("../agenda")
+const weekdaysToCronStringWithRanges = require("../helpers")
 
 const router = express.Router()
 
@@ -57,9 +58,41 @@ async function scheduleApi(data) {
     }
 }
 
+async function recurringScheduleApi(data) {
+    const hours = data.recurring.time.getHours()
+    const mins = data.recurring.time.getMinutes()
+    const date = data.recurring.date
+    const days = data.recurring.days ?? []
+    let cronString = ''
+    if (date) {
+        cronString = `${mins} ${hours} ${date} * *`
+    } else {
+        const daysValue = weekdaysToCronStringWithRanges(days)
+        cronString = `${mins} ${hours} * * ${daysValue}`
+    }
+    const job = await agenda.repeat(cronString, "schedule-api", data, {
+        timezone: data.timezone,
+        skipImmediate: true,
+        startDate: data.recurring.from,
+        endDate: data.recurring.to
+    })  
+    
+    console.log('SCHEDULED JOB: ', job)
+    try {
+        const reqSchedule = await Schedule.findOne({_id: data.savedScheduleId, user:data.user})
+        reqSchedule['status'] = 'SCHEDULED'
+        reqSchedule['scheduleId'] = job.attrs._id
+        reqSchedule.save()
+    } catch (e) {
+        console.log('Error updating schedule status for job: ', job.attrs._id, e)
+    }
+}
+
+
+
 router.post("/schedules", authVerify, async (req, res) => {
-   
-    const newSchedule = Schedule({...req.body, status: 'pending'})
+    const newSchedule = Schedule({...req.body, status: 'PENDING'})
+    const isImmediateSchedule = req.body.immediate ? true : false
     
     try {
         const savedSchedule = await newSchedule.save()
@@ -67,13 +100,17 @@ router.post("/schedules", authVerify, async (req, res) => {
         res.status(201).send(newSchedule)
         try {
             defineJob("schedule-api")
-            await scheduleApi({...req.body, savedScheduleId: savedSchedule._id})
+            if (isImmediateSchedule){
+                await scheduleApi({...req.body, savedScheduleId: savedSchedule._id})
+            } else {
+                await recurringScheduleApi({...req.body, savedScheduleId: savedSchedule._id})
+            }
         } catch(e) {
             console.log('------ SCHEDULING ERROR!!', e)
         }
     } catch(e) {
         res.status(400).send(err)
-    }            
+    }
 })
 
 router.get("/schedules", authVerify, async (req, res) => {
