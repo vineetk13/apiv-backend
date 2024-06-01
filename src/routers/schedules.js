@@ -116,7 +116,8 @@ router.post("/schedules", authVerify, async (req, res) => {
             console.log('------ SCHEDULING ERROR!!', e)
         }
     } catch(e) {
-        res.status(400).send(err)
+        console.log('Error creating new schedule: ', e)
+        res.status(400).send(e)
     }
 })
 
