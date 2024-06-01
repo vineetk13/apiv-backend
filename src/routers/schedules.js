@@ -94,11 +94,11 @@ router.post("/schedules", authVerify, async (req, res) => {
     const newSchedule = Schedule({...req.body, status: 'PENDING'})
     const isImmediateSchedule = req.body.immediate ? true : false
 
-    if (isImmediateSchedule) {
-        if (req.body.immediate <= new Date().toISOString()) {
-            return res.status(400).send("Immediate schedule cannot be prior to current time")
-        }
-    }
+    // if (isImmediateSchedule) {
+    //     if (req.body.immediate <= new Date().toISOString()) {
+    //         return res.status(400).send("Immediate schedule cannot be prior to current time")
+    //     }
+    // }
     
     try {
         const savedSchedule = await newSchedule.save()
