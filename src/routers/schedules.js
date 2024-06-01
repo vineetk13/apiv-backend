@@ -3,7 +3,7 @@ const axios = require("axios")
 const Schedule = require("../models/schedules")
 const authVerify = require("../middleware/authVerify")
 const agenda = require("../agenda")
-const weekdaysToCronStringWithRanges = require("../helpers")
+const helpers = require("../helpers")
 
 const router = express.Router()
 
@@ -68,7 +68,7 @@ async function recurringScheduleApi(data) {
     if (date) {
         cronString = `${mins} ${hours} ${date} * *`
     } else {
-        const daysValue = weekdaysToCronStringWithRanges(days)
+        const daysValue = helpers.weekdaysToCronStringWithRanges(days)
         cronString = `${mins} ${hours} * * ${daysValue}`
     }
     const job = await agenda.repeat(cronString, "schedule-api", data, {
