@@ -69,6 +69,9 @@ const scheduleSchema = new mongoose.Schema({
     apiResponse: {
         type: Object
     },
+    apiResponseStatus: {
+        type: Number
+    },
     apiError: {
         type: Object
     },

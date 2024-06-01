@@ -19,11 +19,12 @@ const defineJob = (jobName) => {
                     headers: data.headers,
                     data: data.body ? JSON.parse(data.body) : undefined
                 })
-                console.log(`----- API response for job ${job.attrs._id}: `, apiResponse)
+                console.log(`----- API response for job ${job.attrs._id}: `, apiResponse.data)
                 try {
                     const reqSchedule = await Schedule.findOne({_id: data.savedScheduleId, user:data.user})
                     reqSchedule['status'] = 'API_SUCCESS'
-                    reqSchedule['apiResponse'] = apiResponse
+                    reqSchedule['apiResponse'] = apiResponse.data
+                    reqSchedule['apiResponseStatus'] = apiResponse.status
                     reqSchedule.save()
                 } catch (e) {
                     console.log('Error updating apiResponse for job: ', job.attrs._id, e)
@@ -34,7 +35,7 @@ const defineJob = (jobName) => {
                 try {
                     const reqSchedule = await Schedule.findOne({_id: data.savedScheduleId, user:data.user})
                     reqSchedule['status'] = 'API_FAILED'
-                    reqSchedule['apiError'] = apiError
+                    reqSchedule['apiError'] = apiError.response
                     reqSchedule.save()
                 } catch (e) {
                     console.log('Error updating apiError for job: ', job.attrs._id, e)
