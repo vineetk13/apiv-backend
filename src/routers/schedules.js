@@ -22,7 +22,7 @@ const defineJob = (jobName) => {
                 console.log(`----- API response for job ${job.attrs._id}: `, apiResponse)
                 try {
                     const reqSchedule = await Schedule.findOne({_id: data.savedScheduleId, user:data.user})
-                    reqSchedule['status'] = 'sucess'
+                    reqSchedule['status'] = 'API_SUCCESS'
                     reqSchedule['apiResponse'] = apiResponse
                     reqSchedule.save()
                 } catch (e) {
@@ -33,7 +33,7 @@ const defineJob = (jobName) => {
                 console.log(`----- API ERROR for job ${job.attrs._id}: `, apiError.response)
                 try {
                     const reqSchedule = await Schedule.findOne({_id: data.savedScheduleId, user:data.user})
-                    reqSchedule['status'] = 'sucess'
+                    reqSchedule['status'] = 'API_FAILED'
                     reqSchedule['apiError'] = apiError.response
                     reqSchedule.save()
                 } catch (e) {
@@ -93,6 +93,12 @@ async function recurringScheduleApi(data) {
 router.post("/schedules", authVerify, async (req, res) => {
     const newSchedule = Schedule({...req.body, status: 'PENDING'})
     const isImmediateSchedule = req.body.immediate ? true : false
+
+    if (isImmediateSchedule) {
+        if (req.body.immediate <= new Date().toISOString()) {
+            return res.status(400).send("Immediate schedule cannot be prior to current time")
+        }
+    }
     
     try {
         const savedSchedule = await newSchedule.save()
