@@ -30,11 +30,11 @@ const defineJob = (jobName) => {
                 }
 
             } catch(apiError) {
-                console.log(`----- API ERROR for job ${job.attrs._id}: `, apiError.response)
+                console.log(`----- API ERROR for job ${job.attrs._id}: `, apiError)
                 try {
                     const reqSchedule = await Schedule.findOne({_id: data.savedScheduleId, user:data.user})
                     reqSchedule['status'] = 'API_FAILED'
-                    reqSchedule['apiError'] = apiError.response
+                    reqSchedule['apiError'] = apiError
                     reqSchedule.save()
                 } catch (e) {
                     console.log('Error updating apiError for job: ', job.attrs._id, e)
