@@ -60,8 +60,8 @@ async function scheduleApi(data) {
 }
 
 async function recurringScheduleApi(data) {
-    const hours = data.recurring.time.getHours()
-    const mins = data.recurring.time.getMinutes()
+    const hours = new Date(data.recurring.time).getHours()
+    const mins = new Date(data.recurring.time).getMinutes()
     const date = data.recurring.date
     const days = data.recurring.days ?? []
     let cronString = ''
