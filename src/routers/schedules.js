@@ -50,7 +50,7 @@ async function scheduleApi(data) {
     console.log('SCHEDULED JOB: ', job)
     try {
         const reqSchedule = await Schedule.findOne({_id: data.savedScheduleId, user:data.user})
-        reqSchedule['status'] = 'scheduled'
+        reqSchedule['status'] = 'SCHEDULED'
         reqSchedule['scheduleId'] = job.attrs._id
         reqSchedule.save()
     } catch (e) {
@@ -77,7 +77,7 @@ async function recurringScheduleApi(data) {
         endDate: data.recurring.to
     })  
     
-    console.log('SCHEDULED JOB: ', job)
+    console.log('RECURRING SCHEDULED JOB: ', job)
     try {
         const reqSchedule = await Schedule.findOne({_id: data.savedScheduleId, user:data.user})
         reqSchedule['status'] = 'SCHEDULED'

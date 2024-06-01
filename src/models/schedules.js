@@ -81,6 +81,7 @@ const scheduleSchema = new mongoose.Schema({
     },
     immediate: {
         type: Date,
+        min: new Date(),
         validate: {
             validator: function() {
                 return this.recurring || this.immediate
