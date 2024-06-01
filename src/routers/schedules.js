@@ -71,7 +71,7 @@ async function recurringScheduleApi(data) {
         const daysValue = helpers.weekdaysToCronStringWithRanges(days)
         cronString = `${mins} ${hours} * * ${daysValue}`
     }
-    const job = await agenda.repeat(cronString, "schedule-api", data, {
+    const job = await agenda.every(cronString, "schedule-api", data, {
         timezone: data.timezone,
         skipImmediate: true,
         startDate: data.recurring.from,
