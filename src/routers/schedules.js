@@ -17,7 +17,7 @@ const defineJob = (jobName) => {
                     url: data.apiUrl,
                     method: data.method,
                     headers: data.headers,
-                    data: JSON.parse(data.body)
+                    data: data.body ? JSON.parse(data.body) : undefined
                 })
                 console.log(`----- API response for job ${job.attrs._id}: `, apiResponse)
                 try {
