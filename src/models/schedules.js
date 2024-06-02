@@ -15,14 +15,18 @@ const recurringScheduleSchema = new mongoose.Schema({
     },
     days: {
         type: [String],
-        validate: [{
-            validator: function(arr) {
-                const minItems = 1
-                const maxItems = 7
-                return arr.length >= minItems && arr.length <= maxItems
-            },
-            message: props => `Array must contain between 1 and 7 items. Current length: ${props.value.length}`
-        }, {
+        validate: [
+            // {
+            //     validator: function(arr) {
+            //         if (this.days) {
+            //             const minItems = 1
+            //             const maxItems = 7
+            //             return arr.length >= minItems && arr.length <= maxItems
+            //         }
+            //     },
+            //     message: props => `Array must contain between 1 and 7 items. Current length: ${props.value.length}`
+            // },
+        {
             validator: function() {
                 return this.days || this.date
             },
