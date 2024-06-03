@@ -9,7 +9,7 @@ const dburi = `mongodb+srv://apivproject:${process.env.API_KEY}@cluster0.od1wh3m
 const agenda = new Agenda({
     db: { 
             address: dburi, 
-            collection: 'agendaJobs', 
+            collection: 'agendajobs', 
             options: { useUnifiedTopology: true }, 
         },
         processEvery: "1 minute",
