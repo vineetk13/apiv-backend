@@ -1,6 +1,7 @@
 const express = require("express")
 const axios = require("axios")
 const Schedule = require("../models/schedules")
+const AgendaJob = require("../models/agendaJob")
 const authVerify = require("../middleware/authVerify")
 const agenda = require("../agenda")
 const helpers = require("../helpers")
@@ -123,7 +124,7 @@ router.post("/schedules", authVerify, async (req, res) => {
 
 router.get("/schedules", authVerify, async (req, res) => {
     try {
-        const schedules = await Schedule.find({user: req.body.user}).populate({path: 'scheduleId', model: 'AgendaJob'}).exec()
+        const schedules = await Schedule.find({user: req.body.user}).populate({path: 'scheduleId', model: AgendaJob}).exec()
         console.log('------ SCHEDULES: ', schedules)
         res.status(200).send(schedules)
     } catch(e) {
