@@ -53,7 +53,8 @@ const scheduleSchema = new mongoose.Schema({
     },
     scheduleId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "AgendaJob"
+        ref: "AgendaJob",
+        default: null
     },
     apiUrl: {
         type: String,

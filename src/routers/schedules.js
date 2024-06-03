@@ -123,10 +123,10 @@ router.post("/schedules", authVerify, async (req, res) => {
 
 router.get("/schedules", authVerify, async (req, res) => {
     try {
-        const schedules = await Schedule.find({user: req.body.user}).populate('scheduleId', "-__v").select("-__v")
+        const schedules = await Schedule.find({user: req.body.user}).populate('scheduleId')
         res.status(200).send(schedules)
     } catch(e) {
-        res.status(500).send(e)
+        res.status(400).send(e)
     }
 })
 
