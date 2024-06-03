@@ -124,8 +124,10 @@ router.post("/schedules", authVerify, async (req, res) => {
 router.get("/schedules", authVerify, async (req, res) => {
     try {
         const schedules = await Schedule.find({user: req.body.user}).populate('scheduleId')
+        console.log('------ SCHEDULES: ', schedules)
         res.status(200).send(schedules)
     } catch(e) {
+        console.log('GET SCHEDULES ERROR: ', e)
         res.status(400).send(e)
     }
 })
