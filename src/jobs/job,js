@@ -1,0 +1,52 @@
+const defineJob = (jobName) => {
+    agenda.define(jobName, async (job) => {
+        console.log('HANDLER JOB: ', job.attrs)
+        const { data } = job.attrs
+        if (data) {
+            try {
+                const ranAt = new Date()
+                const apiResponse = await axios({
+                    url: data.apiUrl,
+                    method: data.method,
+                    headers: data.headers,
+                    data: data.body ? JSON.parse(data.body) : undefined
+                })
+                console.log(`----- API response for job ${job.attrs._id}: `, apiResponse.data)
+                try {
+                    const reqSchedule = await Schedule.findOne({_id: data.savedScheduleId, user:data.user})
+                    reqSchedule['status'] = 'API_SUCCESS'
+                    const responseObj = {
+                        response: apiResponse?.data ?? {},
+                        status: apiResponse?.status ?? 0,
+                        ranAt: ranAt
+                    }
+                    
+                    reqSchedule['apiResponse'] = reqSchedule['apiResponse'].push(responseObj)
+                    reqSchedule.save()
+                } catch (e) {
+                    console.log('Error updating apiResponse for job: ', job.attrs._id, e)
+                }
+
+            } catch(apiError) {
+                console.log(`----- API ERROR for job ${job.attrs._id}: `, apiError)
+                try {
+                    const reqSchedule = await Schedule.findOne({_id: data.savedScheduleId, user:data.user})
+                    const responseObj = {
+                        response: apiError?.response?.data ?? {},
+                        status: apiError.response?.status ?? 0,
+                        ranAt: ranAt
+                    }
+                    
+                    reqSchedule['apiResponse'] = reqSchedule['apiResponse'].push(responseObj)
+                    reqSchedule['status'] = 'API_FAILED'
+                    reqSchedule.save()
+                } catch (e) {
+                    console.log('Error updating apiError for job: ', job.attrs._id, e)
+                }
+            }
+        }
+
+    })
+}
+
+module.exports = { defineJob }

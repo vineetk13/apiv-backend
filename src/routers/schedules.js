@@ -5,47 +5,11 @@ const AgendaJob = require("../models/agendaJob")
 const authVerify = require("../middleware/authVerify")
 const agenda = require("../agenda")
 const helpers = require("../helpers")
+const apivJobs = require("../jobs/job.js")
 
 const router = express.Router()
 
-const defineJob = (jobName) => {
-    agenda.define(jobName, async (job) => {
-        console.log('HANDLER JOB: ', job.attrs)
-        const { data } = job.attrs
-        if (data) {
-            try {
-                const apiResponse = await axios({
-                    url: data.apiUrl,
-                    method: data.method,
-                    headers: data.headers,
-                    data: data.body ? JSON.parse(data.body) : undefined
-                })
-                console.log(`----- API response for job ${job.attrs._id}: `, apiResponse.data)
-                try {
-                    const reqSchedule = await Schedule.findOne({_id: data.savedScheduleId, user:data.user})
-                    reqSchedule['status'] = 'API_SUCCESS'
-                    reqSchedule['apiResponse'] = apiResponse.data
-                    reqSchedule['apiResponseStatus'] = apiResponse.status
-                    reqSchedule.save()
-                } catch (e) {
-                    console.log('Error updating apiResponse for job: ', job.attrs._id, e)
-                }
 
-            } catch(apiError) {
-                console.log(`----- API ERROR for job ${job.attrs._id}: `, apiError)
-                try {
-                    const reqSchedule = await Schedule.findOne({_id: data.savedScheduleId, user:data.user})
-                    reqSchedule['status'] = 'API_FAILED'
-                    reqSchedule['apiError'] = apiError.response
-                    reqSchedule.save()
-                } catch (e) {
-                    console.log('Error updating apiError for job: ', job.attrs._id, e)
-                }
-            }
-        }
-
-    })
-}
 
 async function scheduleApi(data) {
     const job = await agenda.schedule(data.immediate, "schedule-api", data)
@@ -107,7 +71,7 @@ router.post("/schedules", authVerify, async (req, res) => {
         console.log('------ SAVED SCHEDULKE: ', savedSchedule)
         res.status(201).send(newSchedule)
         try {
-            defineJob("schedule-api")
+            apivJobs.defineJob("schedule-api")
             if (isImmediateSchedule){
                 await scheduleApi({...req.body, savedScheduleId: savedSchedule._id})
             } else {

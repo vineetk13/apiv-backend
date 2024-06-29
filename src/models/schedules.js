@@ -46,6 +46,13 @@ const recurringScheduleSchema = new mongoose.Schema({
     }
 })
 
+const responseSchema = new mongoose.Schema({
+    id: Schema.Types.UUID,
+    response: Object,
+    status: Number,
+    ranAt: Date
+})
+
 const scheduleSchema = new mongoose.Schema({
     name:{
         type:String,
@@ -72,13 +79,8 @@ const scheduleSchema = new mongoose.Schema({
         type: Object
     },
     apiResponse: {
-        type: Object
-    },
-    apiResponseStatus: {
-        type: Number
-    },
-    apiError: {
-        type: Object
+        type: [responseSchema],
+        default: null
     },
     status: {
         type: String,
