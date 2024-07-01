@@ -47,7 +47,7 @@ const recurringScheduleSchema = new mongoose.Schema({
 })
 
 const responseSchema = new mongoose.Schema({
-    id: Schema.Types.UUID,
+    id: mongoose.Schema.Types.UUID,
     response: Object,
     status: Number,
     ranAt: Date

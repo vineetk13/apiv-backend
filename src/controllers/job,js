@@ -4,7 +4,7 @@ const admin = require('../middleware/firebaseAdmin')
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
-const sendMail = (data) => {
+const sendMail = async (data) => {
     const { apiName, apiUrl, log, ranAt, nextRun, userId } = data
 
     let userEmail = ''
@@ -33,7 +33,7 @@ const sendMail = (data) => {
     }
 }
 
-const updateSchedule = (data) => {
+const updateSchedule = async (data) => {
     const { status , job, apiResponse, apiError, ranAt } = data
     try {
         const reqSchedule = await Schedule.findOne({_id: data.savedScheduleId, user:data.user})
