@@ -5,7 +5,7 @@ const AgendaJob = require("../models/agendaJob")
 const authVerify = require("../middleware/authVerify")
 const agenda = require("../agenda")
 const helpers = require("../helpers")
-const apivJobs = require("../controllers/job.js")
+const apivJobs = require("../controllers/job")
 
 const router = express.Router()
 
