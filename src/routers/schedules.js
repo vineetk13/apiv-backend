@@ -1,5 +1,4 @@
 const express = require("express")
-const axios = require("axios")
 const Schedule = require("../models/schedules")
 const AgendaJob = require("../models/agendaJob")
 const authVerify = require("../middleware/authVerify")
