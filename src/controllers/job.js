@@ -38,6 +38,7 @@ const sendMail = async (data) => {
 
 const updateSchedule = async (data) => {
     const { status , job, apiResponse, apiError, ranAt } = data
+    console.log('----- update schedule data: ', apiRespose?.data, apiResponse?.status)
     try {
         const reqSchedule = await Schedule.findOne({_id: data.savedScheduleId, user:data.user})
         let responseObj = {}
@@ -56,6 +57,8 @@ const updateSchedule = async (data) => {
                 ranAt: ranAt
             }
         }
+        console.log('------- UPDATED schedule 1: ', reqSchedule)
+
         
         reqSchedule['apiResponse'] = reqSchedule['apiResponse'].push(responseObj)
 
@@ -67,6 +70,8 @@ const updateSchedule = async (data) => {
             nextRun: job.attrs.nextRunAt,
             userId: data.user 
         })
+
+        console.log('------- UPDATED schedule 2: ', reqSchedule)
 
         reqSchedule.save()
     } catch (e) {
@@ -88,7 +93,7 @@ const defineJob = (jobName) => {
                     headers: data.headers,
                     data: data.body ? JSON.parse(data.body) : undefined
                 })
-                console.log(`----- API response for job ${job.attrs._id}: `, apiResponse)
+                // console.log(`----- API response for job ${job.attrs._id}: `, apiResponse)
                 
                 updateSchedule({status: 'SUCCESS', job, apiResponse, ranAt})
 
