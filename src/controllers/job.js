@@ -88,7 +88,7 @@ const defineJob = (jobName) => {
                     headers: data.headers,
                     data: data.body ? JSON.parse(data.body) : undefined
                 })
-                console.log(`----- API response for job ${job.attrs._id}: `, apiResponse.data)
+                console.log(`----- API response for job ${job.attrs._id}: `, apiResponse)
                 
                 updateSchedule({status: 'SUCCESS', job, apiResponse, ranAt})
 
