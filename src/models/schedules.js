@@ -80,7 +80,7 @@ const scheduleSchema = new mongoose.Schema({
     },
     apiResponse: {
         type: [responseSchema],
-        default: null
+        default: []
     },
     status: {
         type: String,

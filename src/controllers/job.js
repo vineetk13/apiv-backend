@@ -32,15 +32,20 @@ const sendMail = async (data) => {
                 api_next_run: nextRun
             },
         }
-        sgMail.send(msg)
+        sgMail.send(msg).then(() => {}, error => {
+            console.error(error);
+        
+            if (error.response) {
+              console.error(error.response.body)
+            }
+        })
     }
 }
 
 const updateSchedule = async (data) => {
     const { status , job, apiResponse, apiError, ranAt } = data
-    console.log('----- update schedule data: ', apiRespose?.data, apiResponse?.status)
     try {
-        const reqSchedule = await Schedule.findOne({_id: data.savedScheduleId, user:data.user})
+        const reqSchedule = await Schedule.findOne({_id: job.attrs?.data?.savedScheduleId, user: job.attrs?.data?.user})
         let responseObj = {}
         if(status === 'SUCCESS') {
             reqSchedule['status'] = 'API_SUCCESS'
@@ -57,21 +62,17 @@ const updateSchedule = async (data) => {
                 ranAt: ranAt
             }
         }
-        console.log('------- UPDATED schedule 1: ', reqSchedule)
-
         
-        reqSchedule['apiResponse'] = reqSchedule['apiResponse'].push(responseObj)
+        reqSchedule['apiResponse'] = [...reqSchedule['apiResponse'], responseObj]
 
         sendMail({
             apiName: reqSchedule.name, 
             apiUrl: reqSchedule.apiUrl, 
             log: responseObj, 
             ranAt, 
-            nextRun: job.attrs.nextRunAt,
-            userId: data.user 
+            nextRun: job.attrs?.nextRunAt,
+            userId: job.attrs?.data?.user
         })
-
-        console.log('------- UPDATED schedule 2: ', reqSchedule)
 
         reqSchedule.save()
     } catch (e) {
