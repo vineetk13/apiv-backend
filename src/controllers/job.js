@@ -52,7 +52,7 @@ const updateSchedule = async (data) => {
             reqSchedule['status'] = 'API_FAILED'
             const responseObj = {
                 response: apiError?.response?.data ?? {},
-                status: apiError.response?.status ?? 0,
+                status: apiError?.response?.status ?? 0,
                 ranAt: ranAt
             }
         }
