@@ -2,58 +2,11 @@ const express = require("express")
 const Schedule = require("../models/schedules")
 const AgendaJob = require("../models/agendaJob")
 const authVerify = require("../middleware/authVerify")
-const agenda = require("../agenda")
-const helpers = require("../helpers")
 const apivJobs = require("../controllers/job")
+const agenda = require("../agenda")
+const createSchedule = require("../controllers/schedule")
 
 const router = express.Router()
-
-
-
-async function scheduleApi(data) {
-    const job = await agenda.schedule(data.immediate, "schedule-api", data)
-    console.log('SCHEDULED JOB: ', job)
-    try {
-        const reqSchedule = await Schedule.findOne({_id: data.savedScheduleId, user:data.user})
-        reqSchedule['status'] = 'SCHEDULED'
-        reqSchedule['scheduleId'] = job.attrs._id
-        reqSchedule.save()
-    } catch (e) {
-        console.log('Error updating schedule status for job: ', job.attrs._id, e)
-    }
-}
-
-async function recurringScheduleApi(data) {
-    const hours = data.recurring.time.split(":")[0]
-    const mins = data.recurring.time.split(":")[1]
-    const date = data.recurring.date
-    const days = data.recurring.days ?? []
-    let cronString = ''
-    if (date) {
-        cronString = `${mins} ${hours} ${date} * *`
-    } else {
-        const daysValue = helpers.weekdaysToCronStringWithRanges(days)
-        cronString = `${mins} ${hours} * * ${daysValue}`
-    }
-    const job = await agenda.every(cronString, "schedule-api", data, {
-        timezone: data.timezone,
-        skipImmediate: true,
-        startDate: data.recurring.from,
-        endDate: data.recurring.to
-    })  
-    
-    console.log('RECURRING SCHEDULED JOB: ', job)
-    try {
-        const reqSchedule = await Schedule.findOne({_id: data.savedScheduleId, user:data.user})
-        reqSchedule['status'] = 'SCHEDULED'
-        reqSchedule['scheduleId'] = job.attrs._id
-        reqSchedule.save()
-    } catch (e) {
-        console.log('Error updating schedule status for job: ', job.attrs._id, e)
-    }
-}
-
-
 
 router.post("/schedules", authVerify, async (req, res) => {
     const newSchedule = Schedule({...req.body, status: 'PENDING'})
@@ -72,9 +25,9 @@ router.post("/schedules", authVerify, async (req, res) => {
         try {
             apivJobs.defineJob("schedule-api")
             if (isImmediateSchedule){
-                await scheduleApi({...req.body, savedScheduleId: savedSchedule._id})
+                await createSchedule.scheduleApi({...req.body, savedScheduleId: savedSchedule._id})
             } else {
-                await recurringScheduleApi({...req.body, savedScheduleId: savedSchedule._id})
+                await createSchedule.recurringScheduleApi({...req.body, savedScheduleId: savedSchedule._id})
             }
         } catch(e) {
             console.log('------ SCHEDULING ERROR!!', e)
@@ -82,6 +35,43 @@ router.post("/schedules", authVerify, async (req, res) => {
     } catch(e) {
         console.log('Error creating new schedule: ', e)
         res.status(400).send(e)
+    }
+})
+
+router.put("/schedules/:id", authVerify, async (req, res) => {
+    const scheduleId = req.params.id
+    const updates = Object.keys(req.body).filter((item) => item !== 'user' && item !== 'jobId')
+    const validUpdates = ["status"]
+    const isValidOperation = updates.every((u) => validUpdates.includes(u))
+
+    if(!isValidOperation){
+        return res.status(400).send({error: "Invalid updates"})
+    }
+
+    try{
+        const reqSchedule = await Schedule.findOne({_id: scheduleId, user: req.body.user})
+        if(!reqSchedule){
+            res.status(404).send()
+        }
+
+        updates.forEach((update) => reqSchedule[update] = req.body[update])
+
+        try {
+            await agenda.disable({ _id: req.body.jobId })
+        } catch(e) {
+            console.log('------- SCHEDULE JOB DISABLE ERROR: ', e)
+            res.status(500).send()
+        }
+        try {
+            await reqSchedule.save()
+            res.send(reqSchedule)
+        } catch(e) {
+            console.log('------- SCHEDULE PUT ERROR: ', e)
+            res.status(500).send()
+        }
+    }
+    catch(e) {
+        res.status(500).send()
     }
 })
 

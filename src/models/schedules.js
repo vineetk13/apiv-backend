@@ -84,7 +84,7 @@ const scheduleSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['PENDING', 'SCHEDULED', 'SCHEDULE_FAILED', 'RUN_FAILED', 'API_SUCCESS', 'API_FAILED']
+        enum: ['PENDING', 'SCHEDULED', 'SCHEDULE_FAILED', 'RUN_FAILED', 'API_SUCCESS', 'API_FAILED', 'DISABLED']
     },
     timezone: {
         type: String

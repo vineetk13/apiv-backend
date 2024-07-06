@@ -42,11 +42,10 @@ router.get("/apis", authVerify, async (req, res) => {
 router.put("/apis/:id", authVerify, async (req, res) => {
     const apiId = req.params.id
     const updates = Object.keys(req.body).filter((item) => item !== 'user')
-    console.log('------ RECEIVED UPDATES: ', updates)
     const validUpdates = ["url", "method", "headers", "body"]
     const isValidOperation = updates.every((u) => validUpdates.includes(u))
     if(!isValidOperation){
-        return res.status(400).send({error:"Invalid updates"})
+        return res.status(400).send({error: "Invalid updates"})
     }
     try{
             const reqApi = await Api.findOne({_id:apiId, user:req.body.user})
