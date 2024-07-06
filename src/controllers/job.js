@@ -1,11 +1,14 @@
-const sgMail = require('@sendgrid/mail')
+// const sgMail = require('@sendgrid/mail')
+const postmark = require("postmark");
+
 const agenda = require("../agenda")
 const Schedule = require("../models/schedules")
 const axios = require("axios")
 
 const admin = require('../middleware/firebaseAdmin')
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+// sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+var postmarkClient = new postmark.ServerClient(process.env.POSTMARK_API_KEY)
 
 const sendMail = async (data) => {
     const { apiName, apiUrl, log, ranAt, nextRun, userId } = data
@@ -19,20 +22,21 @@ const sendMail = async (data) => {
         console.error('Unable to send job complete mail: ', e)
     }
     if (userEmail) {
-        const msg = {
-            to: userEmail,
-            from: 'scheduler@apiv.io',
-            templateId: 'd-f63f0606c9c7433084e2f0b1da7f2e51',
-            dynamicTemplateData: {
-                api_name: apiName,
-                json_logs: JSON.stringify(log.response),
-                api_url: apiUrl,
-                api_ran_at: ranAt,
-                api_status: log.response,
-                api_next_run: nextRun
-            },
+        const template = {
+            "From": "app-scheduler@apiv.io",
+            "To": "support@apiv.io",
+            "TemplateAlias": "scheduler-notif-template",
+            "TemplateModel": {
+              "api_url": apiUrl,
+              "api_ran_at": ranAt,
+              "api_status":log.status,
+              "json_logs": JSON.stringify(log.response, null, 2),
+              "api_next_run": nextRun,
+              "api_name": apiName
+            }
         }
-        sgMail.send(msg).then(() => {}, error => {
+        
+        postmarkClient.sendEmailWithTemplate(template).then(() => {}, error => {
             console.error(error);
         
             if (error.response) {
