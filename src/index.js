@@ -11,7 +11,15 @@ const authVerify = require("./middleware/authVerify")
 require("./db")
 require("./agenda")
 
-app.use(cors())
+app.use(cors({
+  origin: [
+        'https://app.apiv.io',           // Your Cloudflare Pages domain
+        'http://localhost:3000',        // For local development
+        'http://localhost:5173',        // If using Vite
+        'http://127.0.0.1:3000',        // Alternative localhost
+    ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+}))
 app.use(express.json())
 app.use(healthCheckRouter)
 // app.use(authVerify)
